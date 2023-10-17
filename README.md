@@ -1,79 +1,304 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
-# Getting Started
+Search
+Write
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+Omurbek Mamytbekov
+Как загрузить удаленные PDF-файлы и открыть PDF-файл в React Native
+Omurbek Mamytbekov
+Omurbek Mamytbekov
 
-## Step 1: Start the Metro Server
+2 min read
+·
+Just now
 
-First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
 
-To start Metro, run the following command from the _root_ of your React Native project:
 
-```bash
-# using npm
-npm start
 
-# OR using Yarn
-yarn start
-```
 
-## Step 2: Start your Application
+В этом посте я опишу свое обучение удаленной загрузке PDF-файлов и как открыть PDF-файлы на OS и Android.
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
+Настройте проект: сначала создадим пустой проект, нажав:
 
-### For Android
+npx react-native@latest init RN_Download_PDF
+У него будет всего две кнопка, которая попытается загрузить этот образец PDF-файла и открыть скачанный файл . Это наш исходный код,
 
-```bash
-# using npm
-npm run android
 
-# OR using Yarn
-yarn android
-```
+Загрузить PDF: Теперь давайте напишем нашу функцию загрузки. Перед этим нам нужно будет скачать 2 модуля.
 
-### For iOS
+response-native-blob-util : отличная библиотека для загрузки файлов.
+response-native-share : для iOS мы хотели бы сохранить файлы на нашем телефоне, следовательно, и библиотеку общего доступа.
+Вот код:
 
-```bash
-# using npm
-npm run ios
+const downloadFile = () => {
+    const source = 'https://www.africau.edu/images/default/sample.pdf';
+    let dirs = ReactNativeBlobUtil.fs.dirs;
+    ReactNativeBlobUtil.config({
+      fileCache: true,
+      appendExt: 'pdf',
+      path: `${dirs.DocumentDir}/${source}`,
+      addAndroidDownloads: {
+        useDownloadManager: true,
+        notification: true,
+        title: source,
+        description: 'File downloaded by download manager.',
+        mime: 'application/pdf',
+      },
+    })
+      .fetch('GET', source)
+      .then(res => {
+        // in iOS, we want to save our files by opening up the saveToFiles bottom sheet action.
+        // whereas in android, the download manager is handling the download for us.
+        if (Platform.OS === 'ios') {
+          const filePath = res.path();
+          let options = {
+            type: 'application/pdf',
+            url: filePath,
+            saveToFiles: true,
+          };
+          Share.open(options)
+            .then(resp => console.log(resp))
+            .catch(err => console.log(err));
+        }
+      })
+      .catch(err => console.log('BLOB ERROR -> ', err));
+  };
+Открыть PDF: Теперь давайте напишем вторую функцию открыть. Перед этим нам нужно будет скачать 2 модуля.
 
-# OR using Yarn
-yarn ios
-```
+lreact-native-file-viewer отличная библиотека для открыть файлов.
+react-native-document-picker
+Код:
 
-If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
+const openFile = async () => {
+    try {
+      const res: any = await DocumentPicker.pickSingle({
+        type: [DocumentPicker.types.pdf],
+      });
 
-This is one way to run your app — you can also run it directly from within Android Studio and Xcode respectively.
+      await FileViewer.open(res.uri);
+    } catch (e) {
+      if (DocumentPicker.isCancel(e)) {
+        console.log('Document is cancelled');
+      } else {
+        console.log('Document is cancelled');
+      }
+    }
+  };
+Вывод функциональности:
 
-## Step 3: Modifying your App
 
-Now that you have successfully run the app, let's modify it.
 
-1. Open `App.tsx` in your text editor of choice and edit some lines.
-2. For **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Developer Menu** (<kbd>Ctrl</kbd> + <kbd>M</kbd> (on Window and Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (on macOS)) to see your changes!
+Full code you can download my github!
 
-   For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
+Nice day)
 
-## Congratulations! :tada:
+React Native
+Pdf
+Filé
+React
 
-You've successfully run and modified your React Native App. :partying_face:
 
-### Now what?
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
 
-# Troubleshooting
+Omurbek Mamytbekov
+Written by Omurbek Mamytbekov
+2 Followers
+Software developer & Billionaire & Travel
 
-If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+Edit profile
+More from Omurbek Mamytbekov
+Как использовать React-Native-Image-Picker?
+Omurbek Mamytbekov
+Omurbek Mamytbekov
 
-# Learn More
+Как использовать React-Native-Image-Picker?
+Как выбрать медиа из галереи или камеры?
+4 min read
+·
+20 hours ago
+3
 
-To learn more about React Native, take a look at the following resources:
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+
+React деген эмне жана аны кантип өздөштүрүү керек?
+Omurbek Mamytbekov
+Omurbek Mamytbekov
+
+React деген эмне жана аны кантип өздөштүрүү керек?
+Биз популярдуу JS китепканасы жөнүндө сүйлөшүп, аны изилдөөнүн планын беребиз.
+6 min read
+·
+Aug 14, 2022
+1
+
+
+
+Nest.js — ToDo колдонмосу үчүн Rest API түзөбүз
+Omurbek Mamytbekov
+Omurbek Mamytbekov
+
+Nest.js — ToDo колдонмосу үчүн Rest API түзөбүз
+Акыркы кодду менин githubымдан таба аласыз
+4 min read
+·
+Jun 2
+
+
+2022-жылы эң популярдуу болгон Backend Frameworkтору.
+Omurbek Mamytbekov
+Omurbek Mamytbekov
+
+2022-жылы эң популярдуу болгон Backend Frameworkтору.
+Backend фреймворктору дүйнө жүзү боюнча ишканалар учун кеңири таркалган жана тиркемелерди иштеп чыгууда маанилүү ролду ойнойт. Бул макалада…
+6 min read
+·
+Aug 23, 2022
+
+
+See all from Omurbek Mamytbekov
+Recommended from Medium
+A personal, non-partisan perspective on the Israel-Hamas war
+Isaac Saul
+Isaac Saul
+
+A personal, non-partisan perspective on the Israel-Hamas war
+To understand this war, we must understand the thousand-year history that led us here
+11 min read
+·
+4 days ago
+11.7K
+
+302
+
+
+
+The ChatGPT Hype Is Over — Now Watch How Google Will Kill ChatGPT.
+AL Anany
+AL Anany
+
+The ChatGPT Hype Is Over — Now Watch How Google Will Kill ChatGPT.
+It never happens instantly. The business game is longer than you know.
+
+·
+6 min read
+·
+Sep 1
+14.1K
+
+428
+
+
+
+Lists
+
+
+Stories to Help You Grow as a Software Developer
+19 stories
+·
+464 saves
+
+
+
+General Coding Knowledge
+20 stories
+·
+443 saves
+Databricks role-based and specialty certification line-up.
+
+
+New_Reading_List
+174 stories
+·
+150 saves
+
+
+
+Medium Publications Accepting Story Submissions
+154 stories
+·
+835 saves
+Why Japanese Websites Look So Different
+Mirijam Missbichler
+Mirijam Missbichler
+
+Why Japanese Websites Look So Different
+& how to analyze design choices without jumping to conclusions
+8 min read
+·
+May 2
+14.7K
+
+217
+
+
+
+Bye Bye, Spotify
+Scott-Ryan Abt
+Scott-Ryan Abt
+
+in
+
+Pitfall
+
+Bye Bye, Spotify
+And see ya later, all you subscription services in my little empire
+
+·
+4 min read
+·
+Aug 20
+12.9K
+
+303
+
+
+
+10 tiny habits that can change your life.
+Madhav Bahl
+Madhav Bahl
+
+10 tiny habits that can change your life.
+I tried these for 20 days and here’s the result!
+8 min read
+·
+Jul 25
+3.1K
+
+77
+
+
+
+14 habits that make you more focused than 98% of people
+Alex Mathers
+Alex Mathers
+
+14 habits that make you more focused than 98% of people
+What’s the deal with staying focused?
+
+·
+3 min read
+·
+May 18
+7.4K
+
+134
+
+
+
+See more recommendations
+Help
+
+Status
+
+About
+
+Careers
+
+Blog
+
+Privacy
+
+Terms
+
+Text to speech
+
+Teams
